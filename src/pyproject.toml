@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python_resolver"
+authors = [
+    {name = "Paul Haerle", email = "hello@phaer.org"},
+]
+description = "Experiments with python resolving"
+requires-python = ">=3.10"
+
+dependencies = [
+    "unearth",
+]
+dynamic = ["version"]
+
+[project.scripts]
+python_resolver = "python_resolver:main"
