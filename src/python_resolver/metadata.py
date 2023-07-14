@@ -7,7 +7,6 @@ import tarfile
 import requests
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
 
 
 class MetadataNotFound(Exception):

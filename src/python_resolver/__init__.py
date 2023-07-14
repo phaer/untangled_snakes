@@ -21,6 +21,7 @@ def generate_lock(result):
             target[dependency.name] = []
         if not package:
             # this edge is from None to a root package
+            print("root found")
             continue
         target[package.name].append(dependency.name)
 

@@ -80,7 +80,7 @@ class Candidate:
 
 def get_project_from_pypi(identifier):
     """Return candidates created from the project name and extras."""
-    log.info(f"gathering candidates for {identifier}")
+    log.debug(f"gathering candidates for {identifier}")
     url = "https://pypi.org/simple/{}".format(identifier.name)
 
     response = requests.get(
@@ -94,10 +94,7 @@ def get_project_from_pypi(identifier):
         try:
             distribution = Distribution(link["filename"])
         except UnsupportedFileType as e:
-            # silently ignore some uninteresting files
-            ext = e.filename.split(".")[-1]
-            if ext not in ["egg", "msi", "exe"]:
-                logging.info(f"skipping {e.filename} as its format is not supported")
+            logging.debug(f"skipping {e.filename} as file format is not supported")
             continue
 
         # Skip items that need a different Python version
