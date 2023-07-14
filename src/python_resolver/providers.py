@@ -19,10 +19,10 @@ log = logging.getLogger(__name__)
 
 
 class Candidate:
-    def __init__(self, distribution, url=None, hash=None, extras=None):
+    def __init__(self, distribution, url=None, sha256=None, extras=None):
         self.distribution = distribution
         self.url = url
-        self.hash = hash
+        self.sha256 = sha256
         self.extras = extras
 
         self._metadata = None
@@ -90,6 +90,7 @@ def get_project_from_pypi(identifier):
 
     for link in data.get("files", []):
         url = link["url"]
+        sha256 = link.get("hashes", {}).get("sha256")
         try:
             distribution = Distribution(link["filename"])
         except UnsupportedFileType as e:
@@ -100,7 +101,7 @@ def get_project_from_pypi(identifier):
             continue
 
         # Skip items that need a different Python version
-        requires_python = link.get("data-requires-python")
+        requires_python = link.get("requires-python")
         if requires_python:
             spec = SpecifierSet(requires_python)
             if PYTHON_VERSION not in spec:
@@ -109,7 +110,7 @@ def get_project_from_pypi(identifier):
         yield Candidate(
             distribution,
             url=url,
-            hash=None,
+            sha256=sha256,
             extras=identifier.extras,
         )
 
@@ -150,13 +151,13 @@ class PyPiProvider(AbstractProvider):
     def is_satisfied_by(self, requirement, candidate):
         if canonicalize_name(requirement.name) != candidate.name:
             return False
-        #if requirement.extras not in candidate.extras:
+        # if requirement.extras not in candidate.extras:
         #    return False
         return candidate.version in requirement.specifier
 
     def get_dependencies(self, candidate):
         deps = candidate.dependencies
-        #if candidate.extras:
+        # if candidate.extras:
         #    req = self.get_base_requirement(candidate)
         #    deps.append(req)
         return deps

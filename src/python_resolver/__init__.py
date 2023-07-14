@@ -1,5 +1,6 @@
 import argparse
 import logging
+import json
 
 import resolvelib
 from packaging.requirements import Requirement
@@ -13,14 +14,27 @@ arg_parser.add_argument("-r", "--requirements-list", action="append", default=[]
 logging.basicConfig(level=logging.INFO)
 
 
-def display_resolution(result):
-    """Print pinned candidates and dependency graph to stdout."""
-    print("\n--- Pinned Candidates ---")
-    for name, candidate in result.mapping.items():
-        print(f"{candidate.name}: {candidate.url}")
-
+def generate_lock(result):
+    target = dict()
     for package, dependency in result.graph.iter_edges():
-        print(f"{package} -> {dependency}")
+        if dependency.name not in target:
+            target[dependency.name] = []
+        if not package:
+            # this edge is from None to a root package
+            continue
+        target[package.name].append(dependency.name)
+
+    return {
+        "sources": {
+            identifier.name: {
+                "url": candidate.url,
+                "sha256": candidate.sha256,
+                "version": str(candidate.version),
+            }
+            for identifier, candidate in result.mapping.items()
+        },
+        "targets": {"default": target},
+    }
 
 
 def main():
@@ -31,7 +45,8 @@ def main():
     reporter = resolvelib.BaseReporter()
     resolver = resolvelib.Resolver(provider, reporter)
     result = resolver.resolve(requirements)
-    display_resolution(result)
+    lock = generate_lock(result)
+    print(json.dumps(lock, indent=2))
 
 
 if __name__ == "__main__":
