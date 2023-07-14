@@ -5,16 +5,23 @@
     pkgs = nixpkgs.legacyPackages.${system};
     python = let
       packageOverrides = self: super: {
-        unearth = super.unearth.overridePythonAttrs(old: rec {
-          version = "0.0.0";
-          src = pkgs.fetchFromGitHub {
-            owner = "frostming";
-            repo = "unearth";
-            rev = "992e637e9a67dfbc8706fc98a51833b588310da8";
-            hash = "sha256-yenCjwhGUA70IrfT80ptkWvlMknWA90bL4g6ds374Z8=";
+        resolvelib = super.resolvelib.overridePythonAttrs(old: rec {
+          version = "1.0.1";
+          doCheck = false;
+          src = super.fetchPypi {
+            pname = "resolvelib";
+            inherit version;
+            hash = "sha256-BM52y9Y/3tIHjOIkeF2m7NQrlWSxOQeT9k3ey+mXswk=";
           };
-          nativeBuildInputs = [python.pkgs.pdm-backend];
         });
+        #packaging = super.packaging.overridePythonAttrs(old: rec {
+        #  version = "23.1";
+        #  src = super.fetchPypi {
+        #    pname = "packaging";
+        #    inherit version;
+        #    hash = "sha256-o5KYDSts/6ZEQxiYvlSwBFFRMZ0efsNPDP7Uh2fdM08=";
+        #  };
+        #});
       };
     in pkgs.python3.override {inherit packageOverrides; self = pkgs.python3;};
 
@@ -28,7 +35,8 @@
       ];
       propagatedBuildInputs = [
         python.pkgs.packaging
-        python.pkgs.unearth
+        python.pkgs.resolvelib
+        python.pkgs.requests
       ];
     };
 
@@ -40,12 +48,12 @@
         ps.pytest
         ps.pytest-cov
         ps.ipython
-        ps.unearth
+        ps.python-lsp-server
       ]
     );
     devShell = pkgs.mkShell {
       packages = [
-       devPython
+        devPython
       ];
     };
   in {
