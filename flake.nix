@@ -53,6 +53,7 @@
     );
     devShell = pkgs.mkShell {
       packages = [
+        pkgs.ruff
         devPython
       ];
     };
