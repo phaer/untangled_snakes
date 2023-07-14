@@ -12,23 +12,20 @@ arg_parser.add_argument("-r", "--requirements-list", action="append", default=[]
 
 logging.basicConfig(level=logging.INFO)
 
+
 def display_resolution(result):
     """Print pinned candidates and dependency graph to stdout."""
     print("\n--- Pinned Candidates ---")
     for name, candidate in result.mapping.items():
         print(f"{candidate.name}: {candidate.url}")
 
-    tree = {}
     for package, dependency in result.graph.iter_edges():
         print(f"{package} -> {dependency}")
 
 
 def main():
     args = arg_parser.parse_args()
-    requirements = [
-       Requirement(r) for r in args.requirements_list
-    ]
-
+    requirements = [Requirement(r) for r in args.requirements_list]
 
     provider = PyPiProvider()
     reporter = resolvelib.BaseReporter()
@@ -37,5 +34,5 @@ def main():
     display_resolution(result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

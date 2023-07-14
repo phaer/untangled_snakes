@@ -1,27 +1,26 @@
-import sys
 import logging
 from operator import attrgetter
 from platform import python_version
-from urllib.parse import urlparse, urldefrag
-from collections import namedtuple
 
 import requests
 from packaging.requirements import Requirement
 from packaging.specifiers import SpecifierSet
-from packaging.utils import canonicalize_name, parse_wheel_filename, parse_sdist_filename
-from packaging.version import InvalidVersion, Version
+from packaging.utils import canonicalize_name
+from packaging.version import Version
 
-from resolvelib import BaseReporter, Resolver
 from resolvelib.providers import AbstractProvider
+
+from .distribution import Distribution, UnsupportedFileType
+from .metadata import fetch_metadata
 
 
 PYTHON_VERSION = Version(python_version())
+log = logging.getLogger(__name__)
 
 
 class Candidate:
-    def __init__(self, name, version, url=None, hash=None, extras=None):
-        self.name = canonicalize_name(name)
-        self.version = version
+    def __init__(self, distribution, url=None, hash=None, extras=None):
+        self.distribution = distribution
         self.url = url
         self.hash = hash
         self.extras = extras
@@ -35,13 +34,25 @@ class Candidate:
         return f"<{self.name}[{','.join(self.extras)}]=={self.version}>"
 
     @property
+    def name(self):
+        return self.distribution.name
+
+    @property
+    def version(self):
+        return self.distribution.version
+
+    @property
+    def is_wheel(self):
+        return self.distribution.is_wheel
+
+    @property
+    def is_sdist(self):
+        return self.distribution.is_sdist
+
+    @property
     def metadata(self):
         if self._metadata is None:
-            # FIXME packaging.metadata.parse_email will be available in 23.1
-            from email.parser import BytesParser
-            from io import BytesIO
-            response = requests.get(f"{self.url}.metadata")
-            self._metadata = BytesParser().parse(BytesIO(response.content), headersonly=True)
+            self._metadata = fetch_metadata(self)
         return self._metadata
 
     @property
@@ -69,26 +80,23 @@ class Candidate:
 
 def get_project_from_pypi(identifier):
     """Return candidates created from the project name and extras."""
-    logging.info(f'gathering candidates for {identifier}')
+    log.info(f"gathering candidates for {identifier}")
     url = "https://pypi.org/simple/{}".format(identifier.name)
 
-    data = requests.get(url, headers={'Accept': "application/vnd.pypi.simple.v1+json"}).json()
+    response = requests.get(
+        url, headers={"Accept": "application/vnd.pypi.simple.v1+json"}
+    )
+    data = response.json()
 
     for link in data.get("files", []):
         url = link["url"]
-        filename = link["filename"]
-
-#        metadata_hash = link.get('core-metadata')
-#        if not metadata_hash:
-#            logging.debug(f"skipping {filename}, as there's no pep-658 metadata available")
-#            continue
-
-        if filename.endswith(".whl"):
-            name, version, _build, _tags = parse_wheel_filename(filename)
-        elif filename.endswith(".zip") or filename.endswith(".tar.gz"):
-            name, version = parse_sdist_filename(filename)
-        else:
-            logging.debug(f"skipping {filename}, as it seems to be neither a wheel nor an sdist")
+        try:
+            distribution = Distribution(link["filename"])
+        except UnsupportedFileType as e:
+            # silently ignore some uninteresting files
+            ext = e.filename.split(".")[-1]
+            if ext not in ["egg", "msi", "exe"]:
+                logging.info(f"skipping {e.filename} as its format is not supported")
             continue
 
         # Skip items that need a different Python version
@@ -98,7 +106,12 @@ def get_project_from_pypi(identifier):
             if PYTHON_VERSION not in spec:
                 continue
 
-        yield Candidate(name, version, url=url, hash=hash, extras=identifier.extras)
+        yield Candidate(
+            distribution,
+            url=url,
+            hash=None,
+            extras=identifier.extras,
+        )
 
 
 class Identifier:
@@ -118,7 +131,9 @@ class PyPiProvider(AbstractProvider):
     def get_base_requirement(self, candidate):
         return Requirement("{}=={}".format(candidate.name, candidate.version))
 
-    def get_preference(self, identifier, resolutions, candidates, information, backtrack_causes):
+    def get_preference(
+        self, identifier, resolutions, candidates, information, backtrack_causes
+    ):
         return sum(1 for _ in candidates[identifier])
 
     def find_matches(self, identifier, requirements, incompatibilities):
@@ -135,8 +150,8 @@ class PyPiProvider(AbstractProvider):
     def is_satisfied_by(self, requirement, candidate):
         if canonicalize_name(requirement.name) != candidate.name:
             return False
-#        if requirement.extras not in candidate.extras:
-#            return False
+        #if requirement.extras not in candidate.extras:
+        #    return False
         return candidate.version in requirement.specifier
 
     def get_dependencies(self, candidate):
