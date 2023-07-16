@@ -38,14 +38,17 @@ def generate_lock(result):
     }
 
 
-def main():
-    args = arg_parser.parse_args()
-    requirements = [Requirement(r) for r in args.requirements_list]
-
+def resolve(requirements):
     provider = PyPiProvider()
     reporter = resolvelib.BaseReporter()
     resolver = resolvelib.Resolver(provider, reporter)
-    result = resolver.resolve(requirements)
+    return resolver.resolve(requirements)
+
+
+def main():
+    args = arg_parser.parse_args()
+    requirements = [Requirement(r) for r in args.requirements_list]
+    result = resolve(requirements)
     lock = generate_lock(result)
     print(json.dumps(lock, indent=2))
 
