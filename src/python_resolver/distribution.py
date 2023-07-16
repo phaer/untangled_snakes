@@ -38,7 +38,7 @@ class Distribution:
     @property
     def metadata_path(self):
         if self.is_wheel:
-            name = self.name.replace("-", "_")
-            return f"{name}-{self.version}.dist-info/METADATA"
+            distribution = self.filename.split("-")[0]
+            return f"{distribution}-{self.version}.dist-info/METADATA"
         else:
             return f"{self.name}-{self.version}/PKG-INFO"
