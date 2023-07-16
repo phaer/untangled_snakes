@@ -5,7 +5,12 @@ import json
 import resolvelib
 from packaging.requirements import Requirement
 
-from .providers import PyPiProvider
+from .distribution import Distribution, UnsupportedFileType
+from .metadata import fetch_metadata
+from .providers import Identifier, PyPiProvider
+
+
+__all__ = [Identifier, Distribution, UnsupportedFileType, PyPiProvider, fetch_metadata]
 
 
 arg_parser = argparse.ArgumentParser()
