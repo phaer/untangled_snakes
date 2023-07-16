@@ -113,9 +113,22 @@ def get_project_from_pypi(identifier):
 
 
 class Identifier:
-    def __init__(self, requirement_or_candidate):
-        self.name = canonicalize_name(requirement_or_candidate.name)
-        self.extras = tuple(sorted(requirement_or_candidate.extras)) or tuple()
+    def __init__(self, name, extras=()):
+        self.name = name
+        self.extras = extras
+
+    @classmethod
+    def from_requirement(cls, requirement_or_candidate):
+        return cls(
+            canonicalize_name(requirement_or_candidate.name),
+            tuple(sorted(requirement_or_candidate.extras)) or tuple(),
+        )
+
+    def __eq__(self, other):
+        return self.name == other.name and self.extras == other.extras
+
+    def __hash__(self):
+        return hash((self.name, self.extras))
 
     def __repr__(self):
         e = ",".join(self.extras)
@@ -124,7 +137,7 @@ class Identifier:
 
 class PyPiProvider(AbstractProvider):
     def identify(self, requirement_or_candidate):
-        return Identifier(requirement_or_candidate)
+        return Identifier.from_requirement(requirement_or_candidate)
 
     def get_base_requirement(self, candidate):
         return Requirement("{}=={}".format(candidate.name, candidate.version))
