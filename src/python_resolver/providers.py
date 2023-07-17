@@ -1,58 +1,17 @@
-import logging
 from operator import attrgetter
-from platform import python_version
 
-import requests
 from packaging.requirements import Requirement
-from packaging.specifiers import SpecifierSet
 from packaging.utils import canonicalize_name
-from packaging.version import Version
 
 from resolvelib.providers import AbstractProvider
 
-from .distribution import Distribution, UnsupportedFileType
-from .candidate import Candidate
 from .identifier import Identifier
-
-PYTHON_VERSION = Version(python_version())
-log = logging.getLogger(__name__)
-
-
-def get_project_from_pypi(identifier):
-    """Return candidates created from the project name and extras."""
-    log.debug(f"gathering candidates for {identifier}")
-    url = "https://pypi.org/simple/{}".format(identifier.name)
-
-    response = requests.get(
-        url, headers={"Accept": "application/vnd.pypi.simple.v1+json"}
-    )
-    data = response.json()
-
-    for link in data.get("files", []):
-        url = link["url"]
-        sha256 = link.get("hashes", {}).get("sha256")
-        try:
-            distribution = Distribution(link["filename"])
-        except UnsupportedFileType as e:
-            logging.debug(f"skipping {e.filename} as file format is not supported")
-            continue
-
-        # Skip items that need a different Python version
-        requires_python = link.get("requires-python")
-        if requires_python:
-            spec = SpecifierSet(requires_python)
-            if PYTHON_VERSION not in spec:
-                continue
-
-        yield Candidate(
-            distribution,
-            url=url,
-            sha256=sha256,
-            extras=identifier.extras,
-        )
 
 
 class PyPiProvider(AbstractProvider):
+    def __init__(self, finder):
+        self.finder = finder
+
     def identify(self, requirement_or_candidate):
         return Identifier.from_requirement(requirement_or_candidate)
 
@@ -69,7 +28,7 @@ class PyPiProvider(AbstractProvider):
         bad_versions = {c.version for c in incompatibilities[identifier]}
         candidates = (
             candidate
-            for candidate in get_project_from_pypi(identifier)
+            for candidate in self.finder.find_candidates(identifier)
             if candidate.version not in bad_versions
             and all(candidate.version in r.specifier for r in requirements)
         )

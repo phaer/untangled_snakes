@@ -8,9 +8,10 @@ from packaging.requirements import Requirement
 from .distribution import Distribution, UnsupportedFileType
 from .metadata import fetch_metadata
 from .providers import Identifier, PyPiProvider
+from .finders import SimpleIndexFinder
 
 
-__all__ = [Identifier, Distribution, UnsupportedFileType, PyPiProvider, fetch_metadata]
+__all__ = [Identifier, Distribution, UnsupportedFileType, PyPiProvider, SimpleIndexFinder, fetch_metadata]
 
 
 arg_parser = argparse.ArgumentParser()
@@ -44,7 +45,8 @@ def generate_lock(result):
 
 
 def resolve(requirements):
-    provider = PyPiProvider()
+    finder = SimpleIndexFinder()
+    provider = PyPiProvider(finder)
     reporter = resolvelib.BaseReporter()
     resolver = resolvelib.Resolver(provider, reporter)
     return resolver.resolve(requirements)
