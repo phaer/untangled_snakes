@@ -26,7 +26,7 @@
     in pkgs.python3.override {inherit packageOverrides; self = pkgs.python3;};
 
     package = python.pkgs.buildPythonPackage {
-      name = "resolver_test";
+      name = "untangled_snakes";
       format = "pyproject";
       src = ./src;
       nativeBuildInputs = [

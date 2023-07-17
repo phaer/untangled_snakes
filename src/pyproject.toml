@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "python_resolver"
+name = "untangled_snakes"
 authors = [
     {name = "Paul Haerle", email = "hello@phaer.org"},
 ]
@@ -17,4 +17,4 @@ dependencies = [
 dynamic = ["version"]
 
 [project.scripts]
-python_resolver = "python_resolver:main"
+untangled_snakes = "untangled_snakes:main"

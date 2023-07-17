@@ -3,7 +3,7 @@ import pytest
 from packaging.requirements import Requirement
 from packaging.version import Version
 from packaging.utils import InvalidWheelFilename
-from python_resolver import Identifier, Distribution, UnsupportedFileType
+from untangled_snakes import Identifier, Distribution, UnsupportedFileType
 
 identifier_expectations = [
     ("pytest", ("pytest", ())),

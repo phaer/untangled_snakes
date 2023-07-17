@@ -2,7 +2,7 @@ import pytest
 from packaging.requirements import Requirement
 from resolvelib import Resolver
 
-from python_resolver import Identifier, PyPiProvider, SimpleIndexFinder
+from untangled_snakes import Identifier, PyPiProvider, SimpleIndexFinder
 
 
 @pytest.fixture
