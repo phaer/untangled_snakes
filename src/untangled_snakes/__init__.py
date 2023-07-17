@@ -11,7 +11,14 @@ from .providers import Identifier, PyPiProvider
 from .finders import SimpleIndexFinder
 
 
-__all__ = [Identifier, Distribution, UnsupportedFileType, PyPiProvider, SimpleIndexFinder, fetch_metadata]
+__all__ = [
+    Identifier,
+    Distribution,
+    UnsupportedFileType,
+    PyPiProvider,
+    SimpleIndexFinder,
+    fetch_metadata,
+]
 
 
 arg_parser = argparse.ArgumentParser()
