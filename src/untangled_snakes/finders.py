@@ -1,4 +1,6 @@
 import logging
+import json
+from pathlib import Path
 from platform import python_version
 
 import requests
@@ -18,6 +20,7 @@ class SimpleIndexFinder:
         self.index_url = index_url
         self.session = requests.Session()
         self.cache = dict()
+        self.dump_metadata_to = None
 
     def find_candidates(self, identifier):
         """Return candidates created from the project name and extras."""
@@ -38,6 +41,7 @@ class SimpleIndexFinder:
         )
         response.raise_for_status()
         data = response.json()
+        self.dump_metadata(identifier, data)
 
         for link in data.get("files", []):
             url = link["url"]
@@ -63,3 +67,13 @@ class SimpleIndexFinder:
             )
             self.cache[identifier].append(candidate)
             yield candidate
+
+    def dump_metadata(self, identifier, data):
+        """Optionally dump fetched metadata for use in fixtures"""
+        if self.dump_metadata_to:
+            dir = Path(self.dump_metadata_to)
+            dir.mkdir(parents=True, exist_ok=True)
+            filename = str(identifier)
+            path = (dir / filename).with_suffix(".json")
+            with open(path, "w") as f:
+                json.dump(data, f, indent=2)
