@@ -17,9 +17,19 @@ class SimpleIndexFinder:
     def __init__(self, index_url="https://pypi.org/simple"):
         self.index_url = index_url
         self.session = requests.Session()
+        self.cache = dict()
 
     def find_candidates(self, identifier):
         """Return candidates created from the project name and extras."""
+        if identifier in self.cache:
+            log.debug(
+                f"reusing cached candidates for {identifier} from {self.index_url}"
+            )
+            for candidate in self.cache[identifier]:
+                yield candidate
+            return
+
+        self.cache[identifier] = []
         log.debug(f"gathering candidates for {identifier} from {self.index_url}")
         url = "/".join([self.index_url, identifier.name])
 
@@ -45,9 +55,11 @@ class SimpleIndexFinder:
                 if PYTHON_VERSION not in spec:
                     continue
 
-            yield Candidate(
+            candidate = Candidate(
                 distribution,
                 url=url,
                 sha256=sha256,
                 extras=identifier.extras,
             )
+            self.cache[identifier].append(candidate)
+            yield candidate
