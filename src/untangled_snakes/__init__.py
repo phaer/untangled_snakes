@@ -10,14 +10,15 @@ from .metadata import fetch_metadata
 from .providers import Identifier, PyPiProvider
 from .finders import SimpleIndexFinder
 
-
 __all__ = [
-    Identifier,
-    Distribution,
-    UnsupportedFileType,
-    PyPiProvider,
-    SimpleIndexFinder,
-    fetch_metadata,
+    "Identifier",
+    "Distribution",
+    "UnsupportedFileType",
+    "PyPiProvider",
+    "SimpleIndexFinder",
+    "fetch_metadata",
+    "main",
+    "resolve",
 ]
 
 
