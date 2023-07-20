@@ -32,9 +32,8 @@ def generate_lock(result):
     for package, dependency in result.graph.iter_edges():
         if dependency.name not in target:
             target[dependency.name] = []
-        if not package:
+        if package is None:
             # this edge is from None to a root package
-            print("root found")
             continue
         target[package.name].append(dependency.name)
 
