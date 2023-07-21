@@ -1,9 +1,11 @@
 from packaging.requirements import Requirement
 from .metadata import fetch_metadata
+from .test_cases import record_metadata
 
 
 class Candidate:
-    def __init__(self, distribution, url=None, sha256=None, extras=None):
+    def __init__(self, settings, distribution, url=None, sha256=None, extras=None):
+        self.settings = settings
         self.distribution = distribution
         self.url = url
         self.sha256 = sha256
@@ -37,6 +39,10 @@ class Candidate:
     def metadata(self):
         if self._metadata is None:
             self._metadata = fetch_metadata(self)
+            if self.settings.record_test_case:
+                record_metadata(
+                    self.settings, self.distribution.filename, self._metadata
+                )
         return self._metadata
 
     @property
@@ -47,7 +53,7 @@ class Candidate:
         deps = self.metadata.get_all("Requires-Dist", [])
         extras = self.extras if self.extras else [""]
         for d in deps:
-            r = Requirement(d)
+            r = Requirement(d.replace("\n", " "))
             if r.marker is None:
                 yield r
             else:

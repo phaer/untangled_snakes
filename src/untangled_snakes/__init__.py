@@ -9,6 +9,8 @@ from .distribution import Distribution, UnsupportedFileType
 from .metadata import fetch_metadata
 from .providers import Identifier, PyPiProvider
 from .finders import SimpleIndexFinder
+from .settings import Settings
+from .test_cases import start_test_case, finish_test_case
 
 __all__ = [
     "Identifier",
@@ -16,6 +18,7 @@ __all__ = [
     "UnsupportedFileType",
     "PyPiProvider",
     "SimpleIndexFinder",
+    "Settings",
     "fetch_metadata",
     "main",
     "resolve",
@@ -24,6 +27,7 @@ __all__ = [
 
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("-r", "--requirements-list", action="append", default=[])
+arg_parser.add_argument("--record-test-case")
 
 logging.basicConfig(level=logging.INFO)
 
@@ -51,8 +55,8 @@ def generate_lock(result):
     }
 
 
-def resolve(requirements):
-    finder = SimpleIndexFinder()
+def resolve(settings, requirements):
+    finder = SimpleIndexFinder(settings)
     provider = PyPiProvider(finder)
     reporter = resolvelib.BaseReporter()
     resolver = resolvelib.Resolver(provider, reporter)
@@ -61,10 +65,19 @@ def resolve(requirements):
 
 def main():
     args = arg_parser.parse_args()
+    settings = Settings(args.record_test_case)
     requirements = [Requirement(r) for r in args.requirements_list]
-    result = resolve(requirements)
+
+    if settings.record_test_case:
+        start_test_case(settings, requirements)
+
+    result = resolve(settings, requirements)
     lock = generate_lock(result)
-    print(json.dumps(lock, indent=2))
+
+    if settings.record_test_case:
+        finish_test_case(settings, lock)
+    else:
+        print(json.dumps(lock, indent=2))
 
 
 if __name__ == "__main__":
