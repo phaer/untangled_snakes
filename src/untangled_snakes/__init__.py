@@ -47,7 +47,7 @@ def generate_lock(result):
             }
             for identifier, candidate in result.mapping.items()
         },
-        "targets": {"default": target},
+        "targets": {"default": {k: sorted(v) for k, v in target.items()}},
     }
 
 
