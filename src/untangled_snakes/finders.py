@@ -1,7 +1,6 @@
 import logging
 import json
 import gzip
-from pathlib import Path
 from platform import python_version
 
 import requests
@@ -17,11 +16,11 @@ log.setLevel(logging.DEBUG)
 
 
 class SimpleIndexFinder:
-    def __init__(self, index_url="https://pypi.org/simple"):
+    def __init__(self, index_url="https://pypi.org/simple", dump_index_to=None):
         self.index_url = index_url
         self.session = requests.Session()
         self.cache = dict()
-        self.dump_metadata_to = None
+        self.dump_index_to = dump_index_to
 
     def find_candidates(self, identifier):
         """Return candidates created from the project name and extras."""
@@ -42,7 +41,7 @@ class SimpleIndexFinder:
         )
         response.raise_for_status()
         data = response.json()
-        self.dump_metadata(identifier, data)
+        self.dump_index(identifier, data)
 
         for link in data.get("files", []):
             url = link["url"]
@@ -69,12 +68,10 @@ class SimpleIndexFinder:
             self.cache[identifier].append(candidate)
             yield candidate
 
-    def dump_metadata(self, identifier, data):
+    def dump_index(self, identifier, data):
         """Optionally dump fetched metadata for use in fixtures"""
-        if self.dump_metadata_to:
-            dir = Path(self.dump_metadata_to)
-            dir.mkdir(parents=True, exist_ok=True)
+        if self.dump_index_to:
             filename = str(identifier)
-            path = (dir / filename).with_suffix(".json.gz")
+            path = (self.dump_index_to / filename).with_suffix(".json.gz")
             with gzip.open(path, "wt") as f:
                 json.dump(data, f, indent=2)
