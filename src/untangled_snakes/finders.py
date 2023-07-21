@@ -34,7 +34,7 @@ class SimpleIndexFinder:
 
         self.cache[identifier] = []
         log.debug(f"gathering candidates for {identifier} from {self.index_url}")
-        url = "/".join([self.index_url, identifier.name])
+        url = f"{self.index_url}/{identifier.name}"
 
         response = self.session.get(
             url, headers={"Accept": "application/vnd.pypi.simple.v1+json"}
