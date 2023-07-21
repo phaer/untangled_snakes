@@ -11,10 +11,18 @@ description = "Experiments with python resolving"
 requires-python = ">=3.10"
 
 dependencies = [
+    "resolvelib",
     "packaging",
     "requests",
 ]
 dynamic = ["version"]
+
+[project.optional-dependencies]
+test = [
+     "pytest",
+     "requests-mock",
+]
+
 
 [project.scripts]
 untangled_snakes = "untangled_snakes:main"

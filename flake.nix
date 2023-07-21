@@ -35,6 +35,7 @@
               python.pkgs.packaging
               python.pkgs.resolvelib
               python.pkgs.requests
+              python.pkgs.requests-mock
             ];
           };
         packages.python = let
