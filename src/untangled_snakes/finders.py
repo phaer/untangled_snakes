@@ -1,5 +1,6 @@
 import logging
 import json
+import gzip
 from pathlib import Path
 from platform import python_version
 
@@ -74,6 +75,6 @@ class SimpleIndexFinder:
             dir = Path(self.dump_metadata_to)
             dir.mkdir(parents=True, exist_ok=True)
             filename = str(identifier)
-            path = (dir / filename).with_suffix(".json")
-            with open(path, "w") as f:
+            path = (dir / filename).with_suffix(".json.gz")
+            with gzip.open(path, "wt") as f:
                 json.dump(data, f, indent=2)
