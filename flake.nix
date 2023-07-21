@@ -91,7 +91,9 @@
             alejandra.enable = true;
           };
 
-          packages = [pkgs.ruff config.packages.default];
+          packages = [
+            pkgs.ruff
+          ];
           enterShell = ''
           '';
         };
