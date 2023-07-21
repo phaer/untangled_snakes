@@ -2,7 +2,7 @@ import logging
 from platform import python_version
 
 import requests
-from packaging.version import Version
+from packaging.version import Version, InvalidVersion
 from packaging.specifiers import SpecifierSet
 
 from .distribution import Distribution, UnsupportedFileType
@@ -48,8 +48,13 @@ class SimpleIndexFinder:
             sha256 = link.get("hashes", {}).get("sha256")
             try:
                 distribution = Distribution(link["filename"])
-            except UnsupportedFileType as e:
-                logging.debug(f"skipping {e.filename} as file format is not supported")
+            except UnsupportedFileType:
+                logging.info(
+                    f"skipping {link['filename']} as file format is not supported"
+                )
+                continue
+            except InvalidVersion as e:
+                logging.info(f"skipping {link['filename']} because of {e}")
                 continue
 
             # Skip items that need a different Python version

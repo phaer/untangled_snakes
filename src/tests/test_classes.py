@@ -1,7 +1,7 @@
 import pytest
 
 from packaging.requirements import Requirement
-from packaging.version import Version
+from packaging.version import Version, InvalidVersion
 from packaging.utils import InvalidWheelFilename
 from untangled_snakes import Identifier, Distribution, UnsupportedFileType
 
@@ -50,3 +50,5 @@ def test_broken_and_unsupported():
         Distribution("setuptools-50.0.0.zip")
     with pytest.raises(InvalidWheelFilename):
         Distribution("broken.whl")
+    with pytest.raises(InvalidVersion):
+        Distribution("html5lib-1.0-reupload.tar.gz")
