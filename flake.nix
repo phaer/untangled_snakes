@@ -26,7 +26,7 @@
           python.pkgs.buildPythonPackage {
             name = "untangled_snakes";
             format = "pyproject";
-            src = ./src;
+            src = pkgs.lib.cleanSource ./.;
             nativeBuildInputs = [
               python.pkgs.setuptools
               python.pkgs.pytestCheckHook
