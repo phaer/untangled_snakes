@@ -35,6 +35,9 @@
               python.pkgs.packaging
               python.pkgs.resolvelib
               python.pkgs.requests
+              python.pkgs.rich
+            ];
+            checkInputs = [
               python.pkgs.requests-mock
             ];
           };

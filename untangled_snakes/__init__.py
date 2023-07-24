@@ -11,6 +11,7 @@ from .providers import Identifier, PyPiProvider
 from .finders import SimpleIndexFinder
 from .settings import Settings
 from .test_cases import start_test_case, finish_test_case
+from .reporters import DebugReporter
 
 __all__ = [
     "Identifier",
@@ -58,7 +59,7 @@ def generate_lock(result):
 def resolve(settings, requirements):
     finder = SimpleIndexFinder(settings)
     provider = PyPiProvider(finder)
-    reporter = resolvelib.BaseReporter()
+    reporter = DebugReporter()
     resolver = resolvelib.Resolver(provider, reporter)
     return resolver.resolve(requirements)
 
