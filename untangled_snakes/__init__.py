@@ -50,6 +50,8 @@ def generate_lock(result):
         if package is None:
             # this edge is from None to a root package
             continue
+        if package.name not in target:
+            target[package.name] = list()
         target[package.name].append(dependency.name)
 
     return {
