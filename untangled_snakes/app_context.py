@@ -2,8 +2,9 @@ from pathlib import Path
 
 
 class AppContext:
-    def __init__(self, record_test_case=None):
+    def __init__(self, record_test_case=None, legacy_metadata=[]):
         self.record_test_case = record_test_case
+        self.legacy_metadata = legacy_metadata
 
     @property
     def test_case_path(self):

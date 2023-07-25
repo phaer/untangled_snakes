@@ -29,6 +29,15 @@ __all__ = [
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("-r", "--requirements-list", action="append", default=[])
 arg_parser.add_argument("--record-test-case")
+arg_parser.add_argument(
+    "--legacy-metadata",
+    action="append",
+    default=[],
+    help="List of non-standard-compliant packages for which we should evaluate "
+    "setup.py. This happens automatically for packages which don't include "
+    "compliant metadata at all, but you need to force it if a packages "
+    "metadata misses requirements.",
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -61,12 +70,12 @@ def resolve(app_context, requirements):
     provider = PyPiProvider(finder)
     reporter = DebugReporter()
     resolver = resolvelib.Resolver(provider, reporter)
-    return resolver.resolve(requirements)
+    return resolver.resolve(requirements, max_rounds=500)
 
 
 def main():
     args = arg_parser.parse_args()
-    app_context = AppContext(args.record_test_case)
+    app_context = AppContext(args.record_test_case, args.legacy_metadata)
     requirements = [Requirement(r) for r in args.requirements_list]
 
     if app_context.record_test_case:

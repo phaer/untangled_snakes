@@ -34,6 +34,7 @@
             propagatedBuildInputs = [
               python.pkgs.packaging
               python.pkgs.resolvelib
+              python.pkgs.build
               python.pkgs.requests
               python.pkgs.rich
               python.pkgs.requests-mock
