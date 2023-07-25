@@ -1,7 +1,32 @@
+import re
+
 from packaging.utils import (
     parse_wheel_filename,
-    parse_sdist_filename,
+    InvalidSdistFilename,
+    canonicalize_name,
 )
+from packaging.version import Version
+
+PACKAGE_VERSION_RE = re.compile(r"(?P<name>.*)-(?P<version>\d+\..*)")
+
+
+# FIXME: We temporarily implement this ourselves, because upstreams
+# version is too naive atm, see https://github.com/pypa/packaging/issues/703
+# As long as name and version are separated by "-" and the name does not
+# include a ".", the regex above should work
+def parse_sdist_filename(filename):
+    if not filename.endswith(".tar.gz"):
+        raise InvalidSdistFilename(
+            f"Invalid sdist filename (extension must be '.tar.gz' or '.zip'):"
+            f" {filename}"
+        )
+    filename = filename.removesuffix(".tar.gz")
+    match = PACKAGE_VERSION_RE.match(filename)
+    if not match:
+        raise InvalidSdistFilename(f"Invalid sdist filename: {filename}")
+    name = canonicalize_name(match.group("name"))
+    version = Version(match.group("version"))
+    return name, version
 
 
 class InvalidDistribution(Exception):
