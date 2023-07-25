@@ -3,6 +3,7 @@ from platform import python_version
 
 import requests
 from packaging.version import Version, InvalidVersion
+from packaging.utils import InvalidSdistFilename
 from packaging.specifiers import SpecifierSet
 
 from .distribution import Distribution, UnsupportedFileType
@@ -53,7 +54,7 @@ class SimpleIndexFinder:
                     f"skipping {link['filename']} as file format is not supported"
                 )
                 continue
-            except InvalidVersion as e:
+            except (InvalidVersion, InvalidSdistFilename) as e:
                 logging.info(f"skipping {link['filename']} because of {e}")
                 continue
 
