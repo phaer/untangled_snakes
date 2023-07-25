@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-class Settings:
+class AppContext:
     def __init__(self, record_test_case=None):
         self.record_test_case = record_test_case
 

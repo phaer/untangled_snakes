@@ -4,8 +4,8 @@ from .test_cases import record_metadata
 
 
 class Candidate:
-    def __init__(self, settings, distribution, url=None, sha256=None, extras=None):
-        self.settings = settings
+    def __init__(self, app_context, distribution, url=None, sha256=None, extras=None):
+        self.app_context = app_context
         self.distribution = distribution
         self.url = url
         self.sha256 = sha256
@@ -39,9 +39,9 @@ class Candidate:
     def metadata(self):
         if self._metadata is None:
             self._metadata = fetch_metadata(self)
-            if self.settings.record_test_case:
+            if self.app_context.record_test_case:
                 record_metadata(
-                    self.settings, self.distribution.filename, self._metadata
+                    self.app_context, self.distribution.filename, self._metadata
                 )
         return self._metadata
 

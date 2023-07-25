@@ -15,11 +15,11 @@ log.setLevel(logging.DEBUG)
 
 
 class SimpleIndexFinder:
-    def __init__(self, settings, index_url="https://pypi.org/simple"):
+    def __init__(self, app_context, index_url="https://pypi.org/simple"):
         self.index_url = index_url
         self.session = requests.Session()
         self.cache = dict()
-        self.settings = settings
+        self.app_context = app_context
 
     def find_candidates(self, identifier):
         """Return candidates created from the project name and extras."""
@@ -40,8 +40,8 @@ class SimpleIndexFinder:
         )
         response.raise_for_status()
         data = response.json()
-        if self.settings.record_test_case:
-            record_index(self.settings, identifier, data)
+        if self.app_context.record_test_case:
+            record_index(self.app_context, identifier, data)
 
         for link in data.get("files", []):
             url = link["url"]
@@ -65,7 +65,7 @@ class SimpleIndexFinder:
                     continue
 
             candidate = Candidate(
-                self.settings,
+                self.app_context,
                 distribution,
                 url=url,
                 sha256=sha256,

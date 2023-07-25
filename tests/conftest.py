@@ -8,7 +8,7 @@ from resolvelib import Resolver, BaseReporter
 from untangled_snakes import (
     PyPiProvider,
     SimpleIndexFinder,
-    Settings,
+    AppContext,
 )
 
 
@@ -37,8 +37,8 @@ def reporter(reporter_cls):
 
 @pytest.fixture
 def resolver(reporter):
-    settings = Settings()
-    finder = SimpleIndexFinder(settings)
+    app_context = AppContext()
+    finder = SimpleIndexFinder(app_context)
     provider = PyPiProvider(finder)
     resolver = Resolver(provider, reporter)
     return resolver

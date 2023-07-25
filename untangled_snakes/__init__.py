@@ -9,7 +9,7 @@ from .distribution import Distribution, UnsupportedFileType
 from .metadata import fetch_metadata
 from .providers import Identifier, PyPiProvider
 from .finders import SimpleIndexFinder
-from .settings import Settings
+from .app_context import AppContext
 from .test_cases import start_test_case, finish_test_case
 from .reporters import DebugReporter
 
@@ -19,7 +19,7 @@ __all__ = [
     "UnsupportedFileType",
     "PyPiProvider",
     "SimpleIndexFinder",
-    "Settings",
+    "AppContext",
     "fetch_metadata",
     "main",
     "resolve",
@@ -56,8 +56,8 @@ def generate_lock(result):
     }
 
 
-def resolve(settings, requirements):
-    finder = SimpleIndexFinder(settings)
+def resolve(app_context, requirements):
+    finder = SimpleIndexFinder(app_context)
     provider = PyPiProvider(finder)
     reporter = DebugReporter()
     resolver = resolvelib.Resolver(provider, reporter)
@@ -66,17 +66,17 @@ def resolve(settings, requirements):
 
 def main():
     args = arg_parser.parse_args()
-    settings = Settings(args.record_test_case)
+    app_context = AppContext(args.record_test_case)
     requirements = [Requirement(r) for r in args.requirements_list]
 
-    if settings.record_test_case:
-        start_test_case(settings, requirements)
+    if app_context.record_test_case:
+        start_test_case(app_context, requirements)
 
-    result = resolve(settings, requirements)
+    result = resolve(app_context, requirements)
     lock = generate_lock(result)
 
-    if settings.record_test_case:
-        finish_test_case(settings, lock)
+    if app_context.record_test_case:
+        finish_test_case(app_context, lock)
     else:
         print(json.dumps(lock, indent=2))
 
