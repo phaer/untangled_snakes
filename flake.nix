@@ -1,13 +1,18 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    devenv.url = "github:cachix/devenv";
+
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
+
+    treefmt-nix.url = "github:numtide/treefmt-nix";
+    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs @ {flake-parts, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
-        inputs.devenv.flakeModule
+        inputs.treefmt-nix.flakeModule
       ];
       systems = ["x86_64-linux" "aarch64-darwin"];
 
@@ -21,58 +26,25 @@
       }: {
         packages.default = config.packages.untangled_snakes;
         packages.untangled_snakes = let
-          python = config.packages.python;
+          inherit (config.packages) python;
         in
           python.pkgs.buildPythonPackage {
             name = "untangled_snakes";
-            format = "pyproject";
+            pyproject = true;
             src = pkgs.lib.cleanSource ./.;
             nativeBuildInputs = [
               python.pkgs.setuptools
-              python.pkgs.pytestCheckHook
             ];
             propagatedBuildInputs = [
-              python.pkgs.packaging
-              python.pkgs.resolvelib
-              python.pkgs.build
               python.pkgs.requests
               python.pkgs.rich
-              python.pkgs.requests-mock
             ];
           };
-        packages.python = let
-          packageOverrides = self: super: {
-            resolvelib = super.resolvelib.overridePythonAttrs (old: rec {
-              version = "1.0.1";
-              doCheck = false;
-              src = super.fetchPypi {
-                pname = "resolvelib";
-                inherit version;
-                hash = "sha256-BM52y9Y/3tIHjOIkeF2m7NQrlWSxOQeT9k3ey+mXswk=";
-              };
-            });
-            # FIXME: just wait for https://github.com/NixOS/nixpkgs/pull/243349
-            # and use parse_metadata then
-            #packaging = super.packaging.overridePythonAttrs(old: rec {
-            #  version = "23.1";
-            #  src = super.fetchPypi {
-            #    pname = "packaging";
-            #    inherit version;
-            #    hash = "sha256-o5KYDSts/6ZEQxiYvlSwBFFRMZ0efsNPDP7Uh2fdM08=";
-            #  };
-            #});
-          };
-        in
-          pkgs.python3.override {
-            inherit packageOverrides;
-            self = pkgs.python3;
-          };
-
+        packages.python = pkgs.python3;
         packages.devPython = config.packages.python.withPackages (
           ps:
             config.packages.default.propagatedBuildInputs
             ++ [
-              ps.black
               ps.pytest
               ps.pytest-cov
               ps.ipython
@@ -80,24 +52,20 @@
             ]
         );
 
-        devenv.shells.default = {
-          # https://devenv.sh/reference/options/
-          languages.python = {
-            enable = true;
-            package = config.packages.devPython;
-          };
+        treefmt = {
+          projectRootFile = "flake.lock";
 
-          pre-commit.hooks = {
-            black.enable = true;
-            ruff.enable = true;
-            alejandra.enable = true;
-          };
+          # Shell
+          programs.shellcheck.enable = true;
 
-          packages = [
-            pkgs.ruff
-          ];
-          enterShell = ''
-          '';
+          # Nix
+          programs.deadnix.enable = true;
+          programs.statix.enable = true;
+          programs.alejandra.enable = true;
+
+          # Python
+          programs.black.enable = true;
+          programs.ruff.enable = true;
         };
       };
     };

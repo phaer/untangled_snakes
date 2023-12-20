@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,24 +7,14 @@ name = "untangled_snakes"
 authors = [
     {name = "Paul Haerle", email = "hello@phaer.org"},
 ]
-description = "Experiments with python resolving"
+description = "Experiments with python packaging"
 requires-python = ">=3.10"
 
 dependencies = [
-    "resolvelib",
-    "packaging",
-    "build",
     "requests",
     "rich",
 ]
 dynamic = ["version"]
-
-[project.optional-dependencies]
-test = [
-     "pytest",
-     "requests-mock",
-]
-
 
 [project.scripts]
 untangled_snakes = "untangled_snakes:main"

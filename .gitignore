@@ -1,4 +1,1 @@
-__pycache__
-.devenv
-.pre-commit-config.yaml
-src/.coverage
+.envrc.local
