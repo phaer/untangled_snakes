@@ -7,9 +7,14 @@
 
     treefmt-nix.url = "github:numtide/treefmt-nix";
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    pyproject-nix.url = "github:nix-community/pyproject.nix";
+    pyproject-nix.inputs.nixpkgs.follows = "nixpkgs";
+    pyproject-nix.inputs.flake-parts.follows = "flake-parts";
+    pyproject-nix.inputs.treefmt-nix.follows = "treefmt-nix";
   };
 
-  outputs = inputs @ {flake-parts, ...}:
+  outputs = inputs @ {flake-parts, pyproject-nix, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
         inputs.treefmt-nix.flakeModule
@@ -18,39 +23,35 @@
 
       perSystem = {
         config,
-        self',
-        inputs',
-        pkgs,
-        system,
-        ...
-      }: {
-        packages.default = config.packages.untangled_snakes;
-        packages.untangled_snakes = let
-          inherit (config.packages) python;
-        in
-          python.pkgs.buildPythonPackage {
-            name = "untangled_snakes";
-            pyproject = true;
-            src = pkgs.lib.cleanSource ./.;
-            nativeBuildInputs = [
-              python.pkgs.setuptools
-            ];
-            propagatedBuildInputs = [
-              python.pkgs.requests
-              python.pkgs.rich
-            ];
-          };
-        packages.python = pkgs.python3;
-        packages.devPython = config.packages.python.withPackages (
-          ps:
-            config.packages.default.propagatedBuildInputs
-            ++ [
-              ps.pytest
-              ps.pytest-cov
-              ps.ipython
-              ps.python-lsp-server
-            ]
-        );
+          self',
+          inputs',
+          pkgs,
+          system,
+          ...
+      }: let
+        project = pyproject-nix.lib.project.loadPyproject {
+          projectRoot = ./.;
+        };
+        python = pkgs.python3;
+
+      in {
+
+        devShells.default =
+          let
+            arg = project.renderers.withPackages { inherit python; };
+            pythonEnv = python.withPackages arg;
+          in
+            pkgs.mkShell {
+              packages = [ pythonEnv ];
+            };
+
+        packages.default =
+          let
+            attrs = project.renderers.buildPythonPackage { inherit python; };
+          in
+            python.pkgs.buildPythonPackage (attrs // {
+              version = "1.0";
+            });
 
         treefmt = {
           projectRootFile = "flake.lock";
