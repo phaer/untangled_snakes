@@ -12,9 +12,12 @@
     pyproject-nix.inputs.nixpkgs.follows = "nixpkgs";
     pyproject-nix.inputs.flake-parts.follows = "flake-parts";
     pyproject-nix.inputs.treefmt-nix.follows = "treefmt-nix";
+
+    python-nix.url = "github:tweag/python-nix";
+    python-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs @ {flake-parts, pyproject-nix, ...}:
+  outputs = inputs @ {flake-parts, pyproject-nix, python-nix, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
         inputs.treefmt-nix.flakeModule
@@ -32,7 +35,11 @@
         project = pyproject-nix.lib.project.loadPyproject {
           projectRoot = ./.;
         };
-        python = pkgs.python3;
+        python = let
+          packageOverrides = self: super: {
+            python-nix = python-nix.packages.${system}.default;
+          };
+        in pkgs.python3.override {inherit packageOverrides; self = python;};
 
       in {
 
