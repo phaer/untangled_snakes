@@ -17,7 +17,12 @@
     python-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs @ {flake-parts, pyproject-nix, python-nix, ...}:
+  outputs = inputs @ {
+    flake-parts,
+    pyproject-nix,
+    python-nix,
+    ...
+  }:
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
         inputs.treefmt-nix.flakeModule
@@ -25,38 +30,36 @@
       systems = ["x86_64-linux" "aarch64-darwin"];
 
       perSystem = {
-        config,
-          self',
-          inputs',
-          pkgs,
-          system,
-          ...
+        pkgs,
+        system,
+        ...
       }: let
         project = pyproject-nix.lib.project.loadPyproject {
           projectRoot = ./.;
         };
         python = let
-          packageOverrides = self: super: {
+          packageOverrides = _self: _super: {
             python-nix = python-nix.packages.${system}.default;
           };
-        in pkgs.python3.override {inherit packageOverrides; self = python;};
-
+        in
+          pkgs.python3.override {
+            inherit packageOverrides;
+            self = python;
+          };
       in {
+        devShells.default = let
+          arg = project.renderers.withPackages {inherit python;};
+          pythonEnv = python.withPackages arg;
+        in
+          pkgs.mkShell {
+            packages = [pythonEnv];
+          };
 
-        devShells.default =
-          let
-            arg = project.renderers.withPackages { inherit python; };
-            pythonEnv = python.withPackages arg;
-          in
-            pkgs.mkShell {
-              packages = [ pythonEnv ];
-            };
-
-        packages.default =
-          let
-            attrs = project.renderers.buildPythonPackage { inherit python; };
-          in
-            python.pkgs.buildPythonPackage (attrs // {
+        packages.default = let
+          attrs = project.renderers.buildPythonPackage {inherit python;};
+        in
+          python.pkgs.buildPythonPackage (attrs
+            // {
               version = "1.0";
             });
 
