@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "untangled_snakes"
+version = "0.1"
 authors = [
     {name = "Paul Haerle", email = "hello@phaer.org"},
 ]
@@ -15,7 +16,6 @@ dependencies = [
     "rich",
     "python-nix"
 ]
-dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = ["ipython"]
