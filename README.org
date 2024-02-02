@@ -1,0 +1,56 @@
+* Untangled Snakes
+
+Is the project name of an *experimental* toolkit to build python applications with [[https://nixos.org][nix]].
+
+The way it works - or [[*Support][might work]] - is that you give it a /source tree/
+of a python project and /Untangled Snakes/ guides you through a few steps
+to eventually get a nix expression that enables you to...
+
+- get a development shell with an [[*Editable Installs][/editable install/]] of your package.
+- build a wheel for your [[*Cross-Platform support][/current platform/]].
+- reuse dependencies from =nixpkgs= where version constraints allow.
+- reuse URLs and hashes of existing /lock files/ as inputs to standard =nixpkgs= fetchers in
+  a clear and controlled manner.
+
+It does so by providing a /build frontend/ that uses nix and a given
+version of =nixpkgs= to build your
+
+It strives to be a minimal, yet standard-conformant implementation with a
+focus on composable functions for easier integration and customizations.
+
+** [[https://peps.python.org/pep-0517/][PEP 517 – A build-system independent format for source trees]]
+
+* Motivation
+
+* Upcoming
+
+** TODO Examples
+
+
+** TODO Github CI
+- [ ] build all examples on nixos =x86_64-linux=
+- [ ] build all examples on ubuntu =x86_64-linux=
+- [ ] build all examples on ubuntu =x86_64-linux=
+
+* Features & Limitations
+** TODO /Untangled Snakes/ is in a very early stage of development (Jan 2024)
+Please wait with non-explorative usage at least until the CI is up and running.
+
+
+** Cross-Platform support
+
+** Reusing =nixpkgs=
+
+** Wheels & Source Distributions
+
+** Environments & packages =requirements.txt=
+
+** Editable Installs
+
+* Credits
+/Untangled Snakes/ is standing on the shoulder of giants. It's using nix functions from [[https://nix-community.github.io/pyproject.nix/][pyproject.nix]], ideas developed during my work on [[https://github.com/nix-community/dream2nix/][dream2nix]], and of course lots of functionaility from [[https://github.com/nixos/nixpkgs][nixpkgs]] itself.
+
+* Contributing
+I hope to upstream bits to the mentioned upstream projects where considered useful, but find a separate repository helpful in terms of focus, documentation and the general pace of development.
+Pull-Requests are very welcome! You can also ping @phaer on github or @phaer:matrix.org on matrix, where you can also find me in varios nix & python related channels for questions, critique or commentary on this project.
+** TODO keep [[https://github.com/tweag/python-nix/][python-nix]]? if so, override duplicates in flake.lock

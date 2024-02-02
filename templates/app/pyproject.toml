@@ -1,0 +1,21 @@
+[project]
+name = "app"
+version = "0.1.0"
+description = "example app using pdm2nix"
+authors = [
+    {name = "", email = ""},
+]
+dependencies = [
+    "arpeggio>=2.0.2",
+    "requests==2.30.0",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm.dev-dependencies]
+dev = []

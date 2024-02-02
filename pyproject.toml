@@ -12,8 +12,11 @@ description = "Experiments with python packaging"
 requires-python = ">=3.10"
 
 dependencies = [
-    "requests",
+    "pdm",
+    "tomli",
+    "requests==2.30.0",
     "rich",
+    "typer[all]",
     "python-nix"
 ]
 
@@ -21,4 +24,4 @@ dependencies = [
 dev = ["ipython"]
 
 [project.scripts]
-untangled_snakes = "untangled_snakes:main"
+untangled_snakes = "untangled_snakes.cli:app"

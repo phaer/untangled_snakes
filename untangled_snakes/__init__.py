@@ -50,23 +50,20 @@ def main():
     pkgs = flake["inputs"]["nixpkgs"]["legacyPackages"][platform]
     python = pkgs["python3"]
 
-    dependency_names = [
-        d["name"].force() for d in project["dependencies"]["dependencies"]
-    ]
-    validated_constraints = project["validators"]["validateVersionConstraints"](
-        {"python": python}
+    # dependency_names = [
+    #    d["name"].force() for d in project["dependencies"]["dependencies"]
+    # ]
+    validate_checks = pyproject["validators"]["validateChecks"](
+        {"python": python, "project": project}
     )
-    packages_to_fetch = set(validated_constraints.keys())
-    packages_in_nixpkgs = set(dependency_names) - packages_to_fetch
-
-    print(f"packages to fetch: {packages_to_fetch}")
-    print(f"packages in nixpkgs: {packages_in_nixpkgs}")
+    print(validate_checks.force())
     try:
         from IPython import embed
 
         embed()
     except ImportError:
         print("the repl depends on ipython (installed in the dev shell)")
+
 
 if __name__ == "__main__":
     main()
